@@ -1,0 +1,37 @@
+function decryptFile() {
+    let fileInput = document.getElementById("fileInput").files[0];
+    let password = document.getElementById("password").value;
+
+    if (!fileInput || !password) {
+        alert("Please select a file and enter a password.");
+        return;
+    }
+
+    let reader = new FileReader();
+    reader.onload = function(event) {
+        let encryptedData = event.target.result;
+
+        try {
+            let decrypted = CryptoJS.AES.decrypt(encryptedData, password);
+            let originalData = decrypted.toString(CryptoJS.enc.Utf8);
+
+            if (!originalData) {
+                throw new Error("Incorrect password or corrupted file.");
+            }
+
+            // Convert back to a Blob for download
+            let binaryData = atob(originalData.split(",")[1]); // Decode Base64
+            let byteArray = new Uint8Array(binaryData.length);
+            for (let i = 0; i < binaryData.length; i++) {
+                byteArray[i] = binaryData.charCodeAt(i);
+            }
+
+            let blob = new Blob([byteArray], { type: "application/octet-stream" });
+            downloadFile(blob, fileInput.name.replace(".enc", ""));
+        } catch (error) {
+            alert("Decryption failed: " + error.message);
+        }
+    };
+
+    reader.readAsText(fileInput);
+}
