@@ -1,0 +1,26 @@
+function encryptFile() {
+    let fileInput = document.getElementById("fileInput").files[0];
+    let password = document.getElementById("password").value;
+    
+    if (!fileInput || !password) {
+        alert("Please select a file and enter a password.");
+        return;
+    }
+
+    let reader = new FileReader();
+    reader.onload = function(event) {
+        let fileData = event.target.result;
+        let encrypted = CryptoJS.AES.encrypt(fileData, password).toString();
+        downloadFile(encrypted, fileInput.name + ".enc");
+    };
+    reader.readAsDataURL(fileInput);
+}
+
+function downloadFile(content, filename) {
+    let link = document.getElementById("downloadLink");
+    let blob = new Blob([content], { type: "text/plain" });
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    link.style.display = "block";
+    link.innerText = "Download Encrypted File";
+}
